@@ -1,0 +1,42 @@
+# Environments
+.env
+.env.*
+!/.env.example
+
+# Dependencies
+/node_modules
+/backend/venv
+/backend/env
+/backend/.venv
+/backend/__pypackages__
+
+# Build artifacts
+/build
+/dist
+/out
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+
+# Caches
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+/backend/.pytype/
+/backend/cython_debug/

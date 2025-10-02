@@ -1,0 +1,57 @@
+# Predator Trading Bot
+
+This repository contains the source code for the Predator Trading Bot, a full-stack trading application with a React frontend, FastAPI backend, and Supabase for the database and authentication.
+
+## Architecture
+
+- **Frontend**: React, Vite, TailwindCSS, shadcn/ui
+- **Backend**: FastAPI, Python
+- **Database**: Supabase (PostgreSQL)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm (or yarn)
+- Python 3.8+ and pip
+- Docker (optional, for containerized deployment)
+
+### Backend Setup
+
+1.  Navigate to the `backend` directory:
+    ```bash
+    cd backend
+    ```
+2.  Install the required Python packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  Create a `.env` file and add your Supabase credentials:
+    ```
+    SUPABASE_URL="your-supabase-url"
+    SUPABASE_KEY="your-supabase-key"
+    ```
+4.  Start the FastAPI server:
+    ```bash
+    uvicorn main:app --reload
+    ```
+
+### Frontend Setup
+
+1.  Navigate to the `frontend` directory:
+    ```bash
+    cd frontend
+    ```
+2.  Install the required Node.js packages:
+    ```bash
+    npm install
+    ```
+3.  Start the Vite development server:
+    ```bash
+    npm run dev
+    ```
+
+## Deployment
+
+- The frontend is intended to be deployed on Vercel.
+- The backend is intended to be deployed on Koyeb.
