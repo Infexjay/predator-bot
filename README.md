@@ -46,7 +46,17 @@ This repository contains the source code for the Predator Trading Bot, a full-st
     ```bash
     npm install
     ```
-3.  Start the Vite development server:
+3.  Install `tailwindcss` and its peer dependencies, then generate your `tailwind.config.js` and `postcss.config.js` files:
+    ```bash
+    npm install -D tailwindcss postcss autoprefixer
+    npx tailwindcss init -p
+    ```
+    *Note: The `frontend/src/index.css` file has already been configured with the necessary Tailwind directives.*
+4.  (Optional) Initialize `shadcn/ui` to add new components:
+    ```bash
+    npx shadcn-ui@latest init
+    ```
+5.  Start the Vite development server:
     ```bash
     npm run dev
     ```
