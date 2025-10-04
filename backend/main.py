@@ -28,13 +28,29 @@ class Trade(BaseModel):
     price: float
     confidence_score: Optional[float] = None
 
-from backend.market_data import get_market_data
-from backend.ml_model import get_prediction
+from fastapi import BackgroundTasks
+from market_data import get_market_data
+from ml_model import get_prediction
+from train_model import train_and_save_model
+import json
 
 class PredictionRequest(BaseModel):
     symbol: str
 
+# --- In-memory Bot State ---
+bot_state = {"status": "INACTIVE"} # Can be 'ACTIVE' or 'INACTIVE'
+
 # --- API Endpoints ---
+@app.get("/model-info")
+def get_model_info():
+    """Returns metadata about the current ML model."""
+    try:
+        with open("backend/model_info.json", 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Model info file not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 @app.get("/")
 def read_root():
     """Root endpoint to check API status."""
@@ -93,3 +109,35 @@ def get_portfolio(user_id: uuid.UUID):
 def predict(request: PredictionRequest):
     """Generates a trading prediction for a given symbol."""
     return get_prediction(request.symbol)
+
+@app.post("/retrain", status_code=202)
+async def retrain_model(background_tasks: BackgroundTasks):
+    """
+    Triggers a background task to retrain the machine learning model.
+    """
+    background_tasks.add_task(train_and_save_model)
+    return {"message": "Model retraining started in the background."}
+
+# --- Bot Control Endpoints ---
+@app.post("/bot/start", status_code=200)
+def start_bot():
+    """Starts the trading bot."""
+    if bot_state["status"] == "INACTIVE":
+        bot_state["status"] = "ACTIVE"
+        # Here you would typically start your trading loop/logic
+        print("Bot started.")
+    return {"status": bot_state["status"]}
+
+@app.post("/bot/stop", status_code=200)
+def stop_bot():
+    """Stops the trading bot."""
+    if bot_state["status"] == "ACTIVE":
+        bot_state["status"] = "INACTIVE"
+        # Here you would stop your trading loop/logic
+        print("Bot stopped.")
+    return {"status": bot_state["status"]}
+
+@app.get("/bot/status", status_code=200)
+def get_bot_status():
+    """Gets the current status of the trading bot."""
+    return {"status": bot_state["status"]}
