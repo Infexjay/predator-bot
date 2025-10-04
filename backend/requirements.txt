@@ -6,3 +6,4 @@ yfinance
 xgboost
 scikit-learn
 pandas
+apscheduler

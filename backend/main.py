@@ -1,8 +1,9 @@
 import os
 import uuid
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import BaseModel
+import shutil
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
@@ -33,12 +34,19 @@ from market_data import get_market_data
 from ml_model import get_prediction
 from train_model import train_and_save_model
 import json
+from apscheduler.schedulers.background import BackgroundScheduler
 
 class PredictionRequest(BaseModel):
     symbol: str
 
 # --- In-memory Bot State ---
 bot_state = {"status": "INACTIVE"} # Can be 'ACTIVE' or 'INACTIVE'
+
+# --- Automated Retraining ---
+scheduler = BackgroundScheduler()
+# Schedule the training job to run every 24 hours
+scheduler.add_job(train_and_save_model, 'interval', hours=24)
+scheduler.start()
 
 # --- API Endpoints ---
 @app.get("/model-info")
@@ -117,6 +125,22 @@ async def retrain_model(background_tasks: BackgroundTasks):
     """
     background_tasks.add_task(train_and_save_model)
     return {"message": "Model retraining started in the background."}
+
+@app.post("/upload-data", status_code=200)
+async def upload_data(file: UploadFile = File(...)):
+    """Uploads a CSV file for model training."""
+    upload_dir = "backend/custom_data"
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+
+    file_path = os.path.join(upload_dir, file.filename)
+
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        return {"filename": file.filename, "message": "File uploaded successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"There was an error uploading the file: {e}")
 
 # --- Bot Control Endpoints ---
 @app.post("/bot/start", status_code=200)

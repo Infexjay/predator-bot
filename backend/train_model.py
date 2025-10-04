@@ -1,3 +1,4 @@
+import os
 import yfinance as yf
 import pandas as pd
 import xgboost as xgb
@@ -62,6 +63,31 @@ def train_and_save_model(model_path="backend/xgboost_model.json", info_path="bac
 
         if not data.empty:
             all_processed_data.append(data)
+
+    # Load custom uploaded data
+    custom_data_dir = "backend/custom_data"
+    if os.path.exists(custom_data_dir):
+        for filename in os.listdir(custom_data_dir):
+            if filename.endswith(".csv"):
+                print(f"Loading custom data from {filename}...")
+                file_path = os.path.join(custom_data_dir, filename)
+                try:
+                    custom_df = pd.read_csv(file_path)
+                    # Basic validation and processing
+                    required_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+                    if all(col in custom_df.columns for col in required_cols):
+                        custom_df['returns'] = custom_df['Close'].pct_change()
+                        custom_df['ma5'] = custom_df['Close'].rolling(window=5).mean()
+                        custom_df['ma20'] = custom_df['Close'].rolling(window=20).mean()
+                        custom_df['rsi'] = calculate_rsi(custom_df)
+                        custom_df['macd'], custom_df['macd_signal'] = calculate_macd(custom_df)
+                        custom_df['target'] = (custom_df['returns'].shift(-1) > 0).astype(int)
+                        custom_df.dropna(inplace=True)
+                        all_processed_data.append(custom_df)
+                    else:
+                        print(f"Skipping {filename}: missing required columns.")
+                except Exception as e:
+                    print(f"Error processing {filename}: {e}")
 
     if not all_processed_data:
         print("No data collected. Aborting training.")
