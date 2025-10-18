@@ -29,7 +29,7 @@ class Trade(BaseModel):
     confidence_score: Optional[float] = None
 
 from backend.market_data import get_market_data
-from backend.ml_model import get_prediction
+from backend.xgboost_predictor import get_xgboost_prediction
 
 class PredictionRequest(BaseModel):
     symbol: str
@@ -91,5 +91,8 @@ def get_portfolio(user_id: uuid.UUID):
 
 @app.post("/predict")
 def predict(request: PredictionRequest):
-    """Generates a trading prediction for a given symbol."""
-    return get_prediction(request.symbol)
+    """Generates a trading prediction for a given symbol using the XGBoost model."""
+    prediction = get_xgboost_prediction(request.symbol)
+    if "error" in prediction:
+        raise HTTPException(status_code=500, detail=prediction["error"])
+    return prediction

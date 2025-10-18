@@ -31,7 +31,13 @@ This repository contains the source code for the Predator Trading Bot, a full-st
     SUPABASE_URL="your-supabase-url"
     SUPABASE_KEY="your-supabase-key"
     ```
-4.  Start the FastAPI server:
+4.  Train the machine learning model by running the training script:
+    ```bash
+    python train_model.py
+    ```
+    *This will fetch the latest market data, train the model, and create an `xgboost_model.json` file in the `backend` directory.*
+
+5.  Start the FastAPI server:
     ```bash
     uvicorn main:app --reload
     ```
